@@ -1,3 +1,18 @@
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"/Users/jason/dev/projects/command-box/demo/main.js":[function(require,module,exports){
+var CommandBox = require('..');
+
+window.init = function() {
+
+	var root = document.querySelector('#console');
+
+	var box = new CommandBox(root, {
+
+	});
+
+	box.newCommand(true);
+
+}
+},{"..":"/Users/jason/dev/projects/command-box/index.js"}],"/Users/jason/dev/projects/command-box/index.js":[function(require,module,exports){
 module.exports = CommandBox;
 
 var bind = require('dom-bind').bind;
@@ -364,3 +379,118 @@ CommandBox.prototype._buildStructure = function() {
     });
 
 }
+},{"dom-bind":"/Users/jason/dev/projects/command-box/node_modules/dom-bind/index.js"}],"/Users/jason/dev/projects/command-box/node_modules/dom-bind/index.js":[function(require,module,exports){
+var matches = require('dom-matchesselector');
+
+var bind = null, unbind = null;
+
+if (typeof window.addEventListener === 'function') {
+
+	bind = function(el, evtType, cb, useCapture) {
+		el.addEventListener(evtType, cb, useCapture || false);
+		return cb;
+	}
+
+	unbind = function(el, evtType, cb, useCapture) {
+		el.removeEventListener(evtType, cb, useCapture || false);
+		return cb;
+	}
+
+} else if (typeof window.attachEvent === 'function') {
+
+	bind = function(el, evtType, cb, useCapture) {
+		
+		function handler(evt) {
+			evt = evt || window.event;
+			
+			if (!evt.preventDefault) {
+				evt.preventDefault = function() { evt.returnValue = false; }
+			}
+			
+			if (!evt.stopPropagation) {
+				evt.stopPropagation = function() { evt.cancelBubble = true; }
+			}
+
+			cb.call(el, evt);
+		}
+		
+		el.attachEvent('on' + evtType, handler);
+		return handler;
+	
+	}
+
+	unbind = function(el, evtType, cb, useCapture) {
+		el.detachEvent('on' + evtType, cb);
+		return cb;
+	}
+
+}
+
+function delegate(el, evtType, selector, cb, useCapture) {
+	return bind(el, evtType, function(evt) {
+		var currTarget = evt.target;
+		while (currTarget && currTarget !== el) {
+			if (matches(selector, currTarget)) {
+				evt.delegateTarget = currTarget;
+				cb.call(el, evt);
+				break;
+			}
+			currTarget = currTarget.parentNode;
+		}
+	}, useCapture);
+}
+
+function bind_c(el, evtType, cb, useCapture) {
+	cb = bind(el, evtType, cb, useCapture);
+
+	var removed = false;
+	return function() {
+		if (removed) return;
+		removed = true;
+		unbind(el, evtType, cb, useCapture);
+		el = cb = null;
+	}
+}
+
+function delegate_c(el, evtType, selector, cb, useCapture) {
+	cb = delegate(el, evtType, selector, cb, useCapture);
+
+	var removed = false;
+	return function() {
+		if (removed) return;
+		removed = true;
+		unbind(el, evtType, cb, useCapture);
+		el = cb = null;
+	}
+}
+
+exports.bind = bind;
+exports.unbind = unbind;
+exports.delegate = delegate;
+exports.bind_c = bind_c;
+exports.delegate_c = delegate_c;
+},{"dom-matchesselector":"/Users/jason/dev/projects/command-box/node_modules/dom-bind/node_modules/dom-matchesselector/index.js"}],"/Users/jason/dev/projects/command-box/node_modules/dom-bind/node_modules/dom-matchesselector/index.js":[function(require,module,exports){
+var proto = window.Element.prototype;
+var nativeMatch = proto.webkitMatchesSelector
+					|| proto.mozMatchesSelector
+					|| proto.msMatchesSelector
+					|| proto.oMatchesSelector;
+
+if (nativeMatch) {
+	
+	module.exports = function(selector, el) {
+		return nativeMatch.call(el, selector);
+	}
+
+} else {
+
+	console.warn("Warning: using slow matchesSelector()");
+	
+	var indexOf = Array.prototype.indexOf;
+	module.exports = function(selector, el) {
+		return indexOf.call(document.querySelectorAll(selector), el) >= 0;
+	}
+
+}
+
+},{}]},{},["/Users/jason/dev/projects/command-box/demo/main.js"]);

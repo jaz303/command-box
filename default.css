@@ -1,0 +1,55 @@
+.command-box {
+    padding: 5px;
+    overflow: auto;
+    font: 14px monospace;
+}
+
+.command-box output {
+    
+}
+
+.command-box .output-item {
+    display: -webkit-box;
+    -webkit-box-orient: horizontal;
+    -webkit-box-align: stretch;
+    clear: both;
+}
+
+.command-box .input-line {
+    
+}
+    
+.command-box .prompt {
+    white-space: nowrap;
+    margin-right: 5px;
+    display: -webkit-box;
+    -webkit-box-back: center;
+    -webkit-box-orient: vertical;
+}
+    
+.command-box .command-wrapper {
+    display: block;
+    -webkit-box-flex: 1;
+}
+    
+.command-box span.command {
+    display: inline-block;
+}
+
+.command-box input.command {
+    border: none;
+    background: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    font: inherit;
+    -webkit-appearance: textfield;
+    -webkit-user-select: text;
+    cursor: auto;
+    display: -webkit-box;
+    text-align: start;
+}
+
+.command-box input.command:focus {
+    outline: none;
+}
