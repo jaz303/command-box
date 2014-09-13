@@ -27,8 +27,9 @@ function defaultFormatter(object) {
 function defaultEvaluator(command, console) {
     console.notReady();
     setTimeout(function() {
-        console.print('ECHO: ' + command);
+        console.print('evaluate: `' + command + '`');
         console.newCommand(true);
+        console.focus();
     }, 200);
 }
 
@@ -54,6 +55,7 @@ function CommandBox(el, opts) {
 
     this._history = [];
     this._historyIx = null;
+    this._historyStash = null;
     
     this._buildStructure();
 
@@ -157,6 +159,10 @@ CommandBox.prototype.ready = function() {
     this._input.style.display = '-webkit-box';
 }
 
+CommandBox.prototype.focus = function() {
+    this._command.focus();
+}
+
 /**
  * Clear's the user's current command.
  * Also cancels any active history navigation.
@@ -233,20 +239,7 @@ CommandBox.prototype._optionsForNewPrompt = function() {
 }
 
 CommandBox.prototype._bell = function() {
-    console.log("BELL");
-}
-
-CommandBox.prototype._handlePaste = function(e) {
-
-    console.log("PASTE");
-
-    // var pastedText = undefined;
-    // if (e.clipboardData && e.clipboardData.getData) {
-    //     pastedText = e.clipboardData.getData('text/plain');
-    // }
-    // if (pastedText !== undefined) {
-    //     console.log(pastedText);
-    // }
+    // TODO: beep or something
 }
 
 CommandBox.prototype._handleEnter = function() {
@@ -274,38 +267,38 @@ CommandBox.prototype._handleClear = function() {
 
 CommandBox.prototype._handleHistoryNav = function(dir) {
     
-    // if (this._history.length == 0) {
-    //     return;
-    // }
+    if (this._history.length == 0) {
+        return;
+    }
     
-    // var cmd = null;
+    var cmd = null;
     
-    // if (dir == 'prev') {
-    //     if (this._historyIx === null) {
-    //         this._historyStash = this._command.value || '';
-    //         this._historyIx = this._history.length - 1;
-    //     } else {
-    //         this._historyIx--;
-    //         if (this._historyIx < 0) {
-    //             this._historyIx = 0;
-    //         }
-    //     }
-    // } else {
-    //     if (this._historyIx === null) {
-    //         return;
-    //     }
-    //     this._historyIx++;
-    //     if (this._historyIx == this._history.length) {
-    //         cmd = this._historyStash;
-    //         this._historyIx = null;
-    //     }
-    // }
+    if (dir == 'prev') {
+        if (this._historyIx === null) {
+            this._historyStash = this._command.value || '';
+            this._historyIx = this._history.length - 1;
+        } else {
+            this._historyIx--;
+            if (this._historyIx < 0) {
+                this._historyIx = 0;
+            }
+        }
+    } else {
+        if (this._historyIx === null) {
+            return;
+        }
+        this._historyIx++;
+        if (this._historyIx == this._history.length) {
+            cmd = this._historyStash;
+            this._historyIx = null;
+        }
+    }
     
-    // if (cmd === null) {
-    //     cmd = this._history[this._historyIx];
-    // }
+    if (cmd === null) {
+        cmd = this._history[this._historyIx];
+    }
     
-    // this._command.value = cmd;
+    this._command.value = cmd;
     
 }
 
@@ -360,11 +353,6 @@ CommandBox.prototype._buildStructure = function() {
 
     bind(this.root, 'focus', function() {
         self._command.focus();
-    });
-
-    bind(this._command, 'paste', function(evt) {
-        evt.preventDefault();
-        self._handlePaste(evt);
     });
 
     bind(this._command, 'keydown', function(evt) {
